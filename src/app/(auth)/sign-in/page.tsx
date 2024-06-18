@@ -69,7 +69,7 @@ const page = () => {
     <div className=" mt-48 ">
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='  max-w-md flex justify-center items-center flex-col  gap-2'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className='  max-w-sm flex justify-center items-center flex-col  gap-2'>
           <FormField
             control={form.control}
             name="identified"
