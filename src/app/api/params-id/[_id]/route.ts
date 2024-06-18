@@ -1,14 +1,14 @@
 import BlogModle from "@/app/models/BlogSchema";
 import dbConnect from "@/app/lib/dbConnect";
-
-export const GET = async (request: Request,{params}: {params : {_id:string}}) => {
+import { NextRequest,NextResponse } from "next/server";
+export const GET = async (request: NextRequest,{params}: {params : {_id:string}}) => {
     
     await dbConnect()
     console.log("_id IS: ",params._id)
     try {
         const isSame = await BlogModle.findById({ _id: params._id })
         if (!isSame) {
-            return Response.json({
+            return NextResponse.json({
                 message: 'not match _id'
             }, { status: 400 })
         }
@@ -20,6 +20,11 @@ export const GET = async (request: Request,{params}: {params : {_id:string}}) =>
             }, { status: 200 }
         )
     } catch (error) {
-        throw new Error("not GET DTATA")
+        return NextResponse.json(
+            {
+                success: false,
+                message: " Error : fetch data"
+            }, { status: 500 }
+        )
     }
 }
