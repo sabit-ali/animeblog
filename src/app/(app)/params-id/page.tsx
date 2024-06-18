@@ -14,8 +14,10 @@ const SinglePageBlog = ({ searchParams }: { searchParams: { _id: string } }) => 
 
     const getParamsAxios = async (AbortController: any) => {
         setIsLoading(true)
+       const _id = String(searchParams._id)
+       console.log("Is paramas-id hai - : ",_id)
         try {
-            const res = await axios.get(`api/params-id/${searchParams._id}`, {
+            const res = await axios.get(`api/params-id/${_id}`, {
                 signal: AbortController.signal
             })
             setData(res.data.data)
