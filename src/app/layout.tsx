@@ -6,7 +6,7 @@ import './globals.css'
 import AuthProvider from "@/context/AuthProvider";
 import { Navbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -23,21 +23,15 @@ export default function RootLayout({
     <html lang="en">
       
       <body className={`${inter.className} `} >
-        <div className="flex flex-col justify-center relative w-full items-center">
+        <div>
         <AuthProvider>
           <ThemeProvider
           attribute="class"
           defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
           >
-          
-           <Navbar/>
             {children}
-            <Toaster/>
-            
+            <Toaster position="top-center"/>
           </ThemeProvider>
-
           </AuthProvider>
         </div>
       </body>

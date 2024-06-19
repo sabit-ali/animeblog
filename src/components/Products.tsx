@@ -1,5 +1,5 @@
-'use client'
 
+import { getSingleProduct } from '@/app/helper'
 import { ThreeDCardDemo } from '@/components/TreeD'
 import { ApiResponse } from '@/types/ApiResponse'
 import axios, { AxiosError } from 'axios'
@@ -8,33 +8,16 @@ import { useParams } from 'next/navigation'
 import { abort } from 'process'
 import React, { useEffect, useState } from 'react'
 
-const SinglePageBlog = ({ searchParams }: { searchParams: { _id: string } }) => {
+const SinglePageBlog = async (_id:string) => {
     const [data, setData] = useState<{ title: string, description: string, image_uri: string } | null>(null)
     const [isLoading, setIsLoading] = useState(false)
+        const _id = String(searchParams._id)
+      const product =  await getSingleProduct(_id)
+      console.log(product)
+     
+    
+    console.log("Is Koko-id data state - : ",data)
 
-    const getParamsAxios = async (AbortController: any) => {
-        setIsLoading(true)
-       const _id = String(searchParams._id)
-       console.log("Is paramas-id hai - : ",_id)
-        try {
-            const res = await axios.get(`api/params-id/${_id}`, {
-                signal: AbortController.signal
-            })
-            setData(res.data.data)
-        } catch (error: any) {
-            throw new Error('Params-id Error :', error.message)
-        }finally {
-            setIsLoading(false)
-        }
-    }
-    useEffect(() => {
-        const abortController = new AbortController()
-        getParamsAxios(AbortController)
-
-        return () => {
-            abortController.abort()
-        }
-    }, [])
     return (
         <>
           <div>

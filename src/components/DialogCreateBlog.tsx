@@ -22,7 +22,6 @@ export const DialogCreateBlog = ({isLoading,onSubmit} : {isLoading : boolean, on
     const {
         register,
         handleSubmit,
-        watch,
         reset,
         formState: { errors },
       } = useForm<z.infer<typeof BlogSchemaTypes>>();
@@ -59,7 +58,9 @@ export const DialogCreateBlog = ({isLoading,onSubmit} : {isLoading : boolean, on
                                 <Textarea {...register('description')} placeholder='Write your feels' typeof='textarea' />
                                 {errors.description && <span>This field is required</span>}
                             </div>
-                            <Button type="submit" disabled={isLoading}>
+                            <Button type="submit" onClick={()=> setTimeout(()=>{
+                                reset()
+                            },200)} disabled={isLoading}>
                                 {isLoading ? (<><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Please wait</>) : ('Submit')}
                             </Button>
                         </form>

@@ -12,7 +12,7 @@ import { User } from "next-auth";
 import Link from "next/link";
 import { BlogSchemaTypes } from "@/app/schemas/BlogSchemaTypes";
 import * as z from 'zod';
-import { useToast } from "@/components/ui/use-toast";
+import {toast} from 'sonner'
 import { ApiResponse } from "@/types/ApiResponse";
 import { Button } from "@/components/ui/button";
 import { Abhaya_Libre } from 'next/font/google';
@@ -22,7 +22,7 @@ import SearchField from "@/components/SearchField";
 
 const fontd = Abhaya_Libre({ subsets: ["sinhala"], weight: '400' });
 
-const Page = (
+const GlobalCards = (
   { searchParams }: {
     searchParams?: {
       query?: string,
@@ -33,12 +33,8 @@ const Page = (
 
   const params = searchParams?.query || ''
   const currentPage = Number(searchParams?.page) || 1;
-
   const [isBlog, setIsBlog] = useState<{ title: string; image_uri: string; description: string; price: string; _id: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-
-  const { toast } = useToast();
   const { data: session } = useSession();
   const user: User = session?.user as User;
 
@@ -47,9 +43,9 @@ const Page = (
     formState: { errors },
   } = useForm<z.infer<typeof BlogSchemaTypes>>();
 
-  const handelBlogState = async ({params,currentPage}:{params:string,currentPage:number}) => {
+  const handelBlogState = async ({ params, currentPage }: { params: string, currentPage: number }) => {
     setIsLoading(true);
-    const response =  await axios.get(`/api/create-blog?query=${params}&page=${currentPage}`);
+    const response = await axios.get(`/api/create-blog?query=${params}&page=${currentPage}`);
     const blogAllData = await response.data.data;
     setIsBlog(blogAllData);
 
@@ -66,53 +62,46 @@ const Page = (
     formData.append('price', data.price);
 
     try {
-      const response = await axios.post(`api/create-blog`, formData, {
-        method: 'POST',
-      });
-      setIsLoading(false);
-      await handelBlogState({params,currentPage});
+      const response = await axios.post(`api/create-blog`, formData);
+      await handelBlogState({ params, currentPage });
       if (response.data.success) {
-        toast({
-          title: response?.data.success,
+        toast.success(response.data.success, {
           description: response.data.message,
-          
         });
       }
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>;
-
-      toast({
-        title: 'Failed to create',
+      toast.error('Failed to create new blog', {
         description: axiosError.response?.data.message,
       });
-      setIsLoading(false);
     } finally {
+      setIsLoading(false);
       reset();
     }
   };
+
 
   const handleDeleteBlog = async (id: string) => {
     const response = await axios.delete(`api/remove-blog/${id}`);
 
     if (!response.status) {
-      toast({
-        title: 'Error not removed',
-        description: response.data.message,
-      });
+      toast.success('error not removed',{
+        description:response.data.message,
+      })
     }
     setIsBlog((prevBlogs) => prevBlogs.filter(blog => blog._id !== id));
-    toast({
-      title: 'Removed',
-      description: response.data.message,
-    });
+    toast.error('removed !',{
+      description:response.data.message
+    })
   };
 
   const isSearchArry = isBlog.filter((field) => field.title.toLowerCase().includes(params.toString().toLowerCase()))
 
   useEffect(() => {
-    handelBlogState({params,currentPage});
-    
-  }, [currentPage,params]);
+
+    handelBlogState({ params, currentPage });
+
+  }, [currentPage, params]);
 
   if (!session) {
     return (
@@ -142,33 +131,35 @@ const Page = (
           <TracingBeam className={`${fontd.className}px-6 `}>
 
             <div className=" py-6 px-8  flex flex-col gap-5 relative">
-            {isSearchArry.map((item) => (
-                <div key={`content-${item._id}`} className=" border rounded-sm border-purple-700 py-4 px-5">
+              {isSearchArry.map((item) => (
+                <Link href={{pathname : 'galary-image', query : {_id : item._id}}} key={`content-${item._id}`}>
+                  <div  className=" border rounded-sm border-purple-700 py-4 px-5">
 
-                  <p className={twMerge(fontd.className, " font-semibold text-4xl text-green-500 font-serif")}>
-                    {item.title}
-                  </p>
+                    <p className={twMerge(fontd.className, " font-semibold text-4xl text-green-500 font-serif")}>
+                      {item.title}
+                    </p>
 
-                  <div className={`text-2xl dark:bg-gray-700 py-4 px-4 rounded-sm prose prose-sm dark:prose-invert ${fontd.className}`}>
-                    <div className=" w-full flex justify-center items-center  shadow-sm">
-                    {item?.image_uri && (
-                      <Image
-                        src={item.image_uri}
-                        alt="blog thumbnail"
-                        height="300"
-                        width="600"
-                        className="rounded-lg mb-10 object-cover"
-                      />
-                    )}
+                    <div className={`text-2xl dark:bg-gray-700 py-4 px-4 rounded-sm prose prose-sm dark:prose-invert ${fontd.className}`}>
+                      <div className=" w-full flex justify-center items-center  shadow-sm">
+                        {item?.image_uri && (
+                          <Image
+                            src={item.image_uri}
+                            alt="blog thumbnail"
+                            height="300"
+                            width="600"
+                            className="rounded-lg mb-10 object-cover"
+                          />
+                        )}
+                      </div>
+                      {item.description}
                     </div>
-                    {item.description}
+                    <div className=" w-full h-4 flex justify-center items-center mt-4">
+                      <Button
+                        onClick={() => handleDeleteBlog(item._id)}
+                        className="dark:bg-black h-4 w-4 rounded-sm dark:text-red-500 text-center">X</Button>
+                    </div>
                   </div>
-                  <div className=" w-full h-4 flex justify-center items-center mt-4">
-                  <Button 
-                  onClick={()=> handleDeleteBlog(item._id)}
-                  className="dark:bg-black h-4 w-4 rounded-sm dark:text-red-500 text-center">X</Button>
-                  </div>
-                </div>
+                </Link>
               ))}
 
             </div>
@@ -191,7 +182,7 @@ const Page = (
           </div>
         </div>
         <nav className="w-full h-12 flex justify-center items-center">
-        <DialogCreateBlog isLoading={isLoading} onSubmit={onSubmit}/>
+          <DialogCreateBlog isLoading={isLoading} onSubmit={onSubmit} />
         </nav>
 
         {isLoading ? (
@@ -207,9 +198,10 @@ const Page = (
         ) : (
           <TracingBeam className={`${fontd.className}px-6 `}>
 
-            <div className=" py-6 px-8  flex flex-col gap-5 relative mb-40 justify-center items-center ">
-              {isSearchArry.map((item) => (
-                <div key={`content-${item._id}`} className=" border rounded-sm border-purple-700 py-4 px-5">
+          <div className=" py-6 px-8  flex flex-col gap-5 relative">
+            {isSearchArry.map((item) => (
+              <Link href={{pathname : 'galary-image', query : {_id : item._id}}} key={`content-${item._id}`}>
+                <div  className=" border rounded-sm border-purple-700 py-4 px-5">
 
                   <p className={twMerge(fontd.className, " font-semibold text-4xl text-green-500 font-serif")}>
                     {item.title}
@@ -217,33 +209,33 @@ const Page = (
 
                   <div className={`text-2xl dark:bg-gray-700 py-4 px-4 rounded-sm prose prose-sm dark:prose-invert ${fontd.className}`}>
                     <div className=" w-full flex justify-center items-center  shadow-sm">
-                    {item?.image_uri && (
-                      <Image
-                        src={item.image_uri}
-                        alt="blog thumbnail"
-                        height="300"
-                        width="600"
-                        className="rounded-lg mb-10 object-cover"
-                      />
-                    )}
+                      {item?.image_uri && (
+                        <Image
+                          src={item.image_uri}
+                          alt="blog thumbnail"
+                          height="300"
+                          width="600"
+                          className="rounded-lg mb-10 object-cover"
+                        />
+                      )}
                     </div>
                     {item.description}
                   </div>
                   <div className=" w-full h-4 flex justify-center items-center mt-4">
-                  <Button 
-                  onClick={()=> handleDeleteBlog(item._id)}
-                  className="dark:bg-black h-4 w-4 rounded-sm dark:text-red-500 text-center">X</Button>
+                    <Button
+                      onClick={() => handleDeleteBlog(item._id)}
+                      className="dark:bg-black h-4 w-4 rounded-sm dark:text-red-500 text-center">X</Button>
                   </div>
                 </div>
-              ))}
+              </Link>
+            ))}
 
-              <PaginationDev totalpage={currentPage}/>
-            </div>
-          </TracingBeam>
+          </div>
+        </TracingBeam>
         )}
       </>
     );
   }
 };
 
-export default Page;
+export default GlobalCards;

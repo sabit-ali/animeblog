@@ -14,10 +14,10 @@ import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { Input } from '@/components/ui/input'
+import {toast} from 'sonner'
 
 const page = () => {
   const router = useRouter()
-  const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof SignInSchema>>(
@@ -38,24 +38,21 @@ const page = () => {
       identified: data.identified,
       password: data.password
     })
-    toast({
-      title: 'Done',
-      description: 'User Successfully login',
-    });
+    if(result?.ok){
+      toast.success('Done,',{
+        description :'User Successfully login'
+      })
+    }
 
     if (result?.error) {
       if (result.error === 'CredentialsSignin') {
-        toast({
-          title: 'Login Failed',
-          description: 'Incorrect username or password',
-          variant: 'destructive',
-        });
+        toast.error('Login Failed',{
+          description:'Incorrect username or password'
+        })
       } else {
-        toast({
-          title: 'Error',
-          description: result?.error,
-          variant: 'destructive',
-        });
+        toast.error('Error',{
+          description : result?.error
+        })
       }
     }
 
@@ -66,10 +63,10 @@ const page = () => {
 
   }
   return (
-    <div className=" mt-48 ">
+    <div className=" w-full h-screen mx-auto flex justify-center items-center  py-4 px-4">
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='  max-w-sm flex justify-center items-center flex-col  gap-2'>
+        <form onSubmit={form.handleSubmit(onSubmit)} >
           <FormField
             control={form.control}
             name="identified"
@@ -96,6 +93,7 @@ const page = () => {
               </FormItem>
             )}
           />
+          <div className=' space-y-3 mt-3 '>
           <Button type="submit" disabled={isSubmitting}> {
             isSubmitting ? (
               <>
@@ -103,6 +101,7 @@ const page = () => {
               </>
             ) : ('signin')
           } </Button>
+          </div>
           
             <ul className='none'>
               <li className=' none'>
@@ -111,7 +110,7 @@ const page = () => {
               <li>
                 <div>
                   <span>not have an account ? <span className='text-sm'>please</span> </span>
-                  <Link href={'/sign-up'} className=' underline '><span className=' text-purple-400 text-base font-mono'>sign-up</span></Link>
+                  <Link href={'/sign-up'} className=' underline '><span className=' text-purple-400 text-base font-mono '>sign-up</span></Link>
                 </div>
               </li>
             </ul>

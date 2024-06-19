@@ -1,17 +1,18 @@
 'use client'
 
 import { HeroHighlightDemo } from "@/components/heroHighlight";
-import Galary from "./get-galary/page";
+import GlobalCards from "./create-blog/page";
 
 
 
 
-export default function Home() {
+
+export default function page() {
   return (
     <>
       <div className=" dark:bg-black">
         <HeroHighlightDemo />
-        <Galary />
+        <GlobalCards />
       </div>
     </>
   );

@@ -12,7 +12,7 @@ import { SignUPSchema } from "@/app/schemas/signUpSchema"
 import { useDebounceCallback } from 'usehooks-ts'
 import { ApiResponse } from '@/types/ApiResponse'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-
+import {toast} from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -20,8 +20,6 @@ import { Input } from '@/components/ui/input'
 
 const SignUp = () => {
   const router = useRouter()
-  const { toast } = useToast()
-
   const [username, setUsername] = useState('')
   const [usernameMessage, setUsernameMessage] = useState('')
   const [isCheckingUsername, SetIsCheckingUsername] = useState(false)
@@ -65,19 +63,18 @@ const SignUp = () => {
     setIsSubmitting(true)
     try {
       const response = await axios.post(`/api/sign-up`, data)
-      toast({
-        title: response?.data.success,
-        description: response?.data.message
+
+      toast.success(response?.data.success,{
+        description:response?.data.message
       })
+
       router.replace(`/verify/${username}`)
       setIsSubmitting(false)
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>
       const errorMessage = axiosError.response?.data.message
-      toast({
-        title: 'SignUp Failed',
-        description: errorMessage,
-        variant: 'destructive'
+      toast.error('signup failed',{
+        description:errorMessage,
       })
     } finally {
       setIsSubmitting(false)
@@ -85,9 +82,9 @@ const SignUp = () => {
   }
 
   return (
-    <div className=" mt-48 ">
+    <div className="  w-full h-screen mx-auto flex justify-center items-center  py-4 px-4">
       <Form {...form}  >
-        <form onSubmit={form.handleSubmit(onSubmit)} className=' max-w-md xl:max-w-2xl flex justify-center items-center flex-col  gap-2'>
+        <form onSubmit={form.handleSubmit(onSubmit)} >
           <FormField
             control={form.control}
             name="username"
@@ -135,13 +132,15 @@ const SignUp = () => {
               </FormItem>
             )}
           />
-          <Button type='submit' disabled={isSubmitting}>
+         <div className=' mt-3 '>
+         <Button type='submit' disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className=' mr-2 h-4 w-4  animate-spin' /> please wait
               </>
             ) : 'Signup'}
           </Button>
+         </div>
           <div className=' py-3 px-3 text-sm md:text-[1rem] text-center'>
             <span>Already have an account ? <span className='text-sm'>please</span> </span>
             <Link href={'/sign-in'} className=' underline '><span className=' text-purple-400 text-base font-mono'>sign-in</span></Link>
